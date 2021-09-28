@@ -1,16 +1,15 @@
 import numpy as np
 
+class MLP():
 
-class MLP(object):
+    def __init__(self, numinputs=8, hiddenlayers=[8,20,10 ], numoutputs=1):
 
-    def __init__(self, num_inputs=8, hidden_layers=[8,20,10 ], num_outputs=1):
-
-        self.num_inputs = num_inputs
-        self.hidden_layers = hidden_layers
-        self.num_outputs = num_outputs
+        self.numinputs = numinputs
+        self.hiddenlayers = hiddenlayers
+        self.numoutputs = numoutputs
 
         # create a generic representation of the layers
-        layers = [num_inputs] + hidden_layers + [num_outputs]
+        layers = [numinputs] + hiddenlayers + [numoutputs]
 
         # create random connection weights for the layers
         weights = []
@@ -50,10 +49,10 @@ if __name__ == "__main__":
     mlp = MLP()
 
     # set random values for network's input
-    inputs = np.random.rand(mlp.num_inputs)
+    inputs = np.random.rand(mlp.numinputs)
 
     # perform forward propagation
     output = mlp.forward_propagate(inputs)
-    print("Network activation inout: {}".format(inputs))
+    print("Network activation input: {}".format(inputs))
 
     print("Network activation: {}".format(output))
