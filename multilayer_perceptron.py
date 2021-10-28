@@ -124,9 +124,11 @@ if __name__ == "__main__":
     sample_len = len(df)
     mlp = MLP(numinputs=df_X.shape[0], hiddenlayers=[2], numoutputs=1,activationfunc = [1,1], alpha = 0.25, lossfunc =1 )
 
-    # for i in range(epochs):
+    for i in range(epochs):
+    print('epoch:' +str(i))
     for i in range(sample_len):
         z_value, activated_value =mlp.forward_propagate(np.array(df_X.iloc[i]))
         weight_update, bias_update= mlp.back_propogate(z_value,activated_value, df_Y.iloc[i])
         mlp.weight_update()
         mlp.bias_update()
+        
