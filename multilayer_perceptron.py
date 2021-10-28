@@ -124,7 +124,38 @@ if __name__ == "__main__":
     df_Y = df.iloc[:,-1]
     df_X = df.iloc[:,0:-1]
     sample_len = len(df)
+    """inputs=input("enter the hiddenlayer learningrate activation lossfunction")
+#inputs="[1,2,3] 0.25 [1,2,1] 1"
+b=inputs.split()
+c=b[0].split("[")
+d=c[1].split("]")
+e=d[0].split(",")
+hidden=[]
+e=['1','2','3']
+for i in range (len(e)):
+    hidden.append(int(e[i]))
+
+    
+
+learningrate=float(b[1])
+
+f=b[2].split("[")
+g=f[1].split("]")
+h=g[0].split(",")
+activation=[]
+for j in range (len(h)):
+    activation.append(int(h[j]))
+
+lossfunction=int(b[3])
+
+print(hidden)
+print(learningrate)
+print(activation)
+print(lossfunction)
+    
+"""
     mlp = MLP(numinputs=df_X.shape[1], hiddenlayers=[2], numoutputs=1,activationfunc = [1,1], alpha = 0.25, lossfunc =1 )
+   
     for i in range(epochs):
         print('epoch:' +str(i))
         for i in range(sample_len):
