@@ -2,67 +2,51 @@ import numpy as np
 
 class MLP():
 
-    def __init__(self, numinputs=8, hiddenlayers=[8,20,10 ], numoutputs=1):
-
+    def __init__(self, numinputs=4, hiddenlayers=[4,2,2,1], numoutputs=1, activationfunc = [1,1,1], alpha = 0.25, lossfunc = 1):
         self.numinputs = numinputs
         self.hiddenlayers = hiddenlayers
         self.numoutputs = numoutputs
 
         # create a generic representation of the layers
         layers = [numinputs] + hiddenlayers + [numoutputs]
-
+         
         # create random connection weights for the layers
-        weights = []
-        for i in range(len(layers)-1):
-            w = np.random.rand(layers[i], layers[i+1])
-            weights.append(w)
-        self.weights = weights
-
-
-    def forward_propagate( inputs, weights):
-        ## bias?
-        # the input layer activation is just the input itself
-        activations = inputs
-        net_inputs = []
-        z_value = []
-        activated_value = []
-        activated_value.append(np.array(df_X.iloc[1,:]))
-        # iterate through the network layers
-        for w in weights:
-            # calculate matrix multiplication between previous activation and weight matrix
-            net_inputs = (np.dot(activations, w))
-            vfunc = np.vectorize(_sigmoid)
-
-            # apply sigmoid activation function
-            activations = vfunc(net_inputs)
-
-            z_value.append(net_inputs)
-            activated_value.append(activations)
-       
-        # return output layer activation
-        return z_value, weights, activated_value
-    
-
-     def back_propogate( z_value, weights, activated_value ): 
+#         weights = []
+#         bias = []
+#         for i in range(len(layers)-1):
+#             bias.append(np.ones(layers[i+1]))
+#             weights.append(np.random.rand(layers[i], layers[i+1]))
+#         self.weights = weights
+#         self.bias = bias
+        self.alpha = alpha
         
-            eval = (1/(len(activated_value[-1]))) * sum(y-activated_value[-1])
-            vfunc = np.vectorize(_sigmoid_derv)
-            sig_derv_activ = [vfunc(x) for x in z_value]
-            weight_update = []
-
-            for i in range(len(weights)-1, -1,-1):
-                    sig_derv_activ[i] = sig_derv_activ[i] * eval
-                    weight_update.insert(0,np.dot(np.reshape(sig_derv_activ[i], (-1, 1)),np.reshape(activated_value[i],(-1,1)).transpose()).transpose())
-                    #add alpha
-
-                    eval = np.dot(np.reshape(sig_derv_activ[i], (-1, 1)).transpose(),weights[i].transpose())
-
-
+        
+        if lossfunc == 1: 
+            self.lss = self.loss_func
+        elif lossfunc == 2: 
+            self.lss = self.cross_entropy_loss
     
-             return  [ weights[i] - weight_update[i] for i in range(len(weights))]
+        self.activationfun = [np.vectorize(self._sigmoid) if i == 1 else np.vectorize(self._relu) if i == 2   else np.vectorize(self._tanh)   for i in activationfunc]
+        self.activationfunderv = [np.vectorize(self._sigmoid_derv) if i == 1 else np.vectorize(self._relu_derv) if i == 2   else np.vectorize(self._tanh_derv)  for i in activationfunc]
+
+        #Test
+        self.weights = [np.array([[-0.2, -0.1],
+        [ 0.1,  0.3]]), np.array([[0.2],
+        [0.3]])]
+        self.bias = [np.array([0.1, 0.1]), np.array([0.2])]
+        
+        
+        
+
+
+    def weight_update(self):
+        self.weights = [  w-w_u for w,w_u in zip(self.weights, weight_update) ]
+    
+    def bias_update(self): 
+        self.bias = [  b-b_u for b,b_u in zip(self.bias, bias_update) ]
+
     
     def _sigmoid(self, x):
-        
         return 1.0 / (1 + np.exp(-x))
         
     
@@ -73,9 +57,9 @@ class MLP():
          return (np.exp(x) - np.exp(-x))/ (np.exp(x)+ np.exp(-x))
         
         
-    def _sigmoid_derv(self, x, e): 
-        val = _sigmoid(x) 
-        return (val - (1-val)) * e
+    def _sigmoid_derv(self, x): 
+             val = self._sigmoid(x) 
+             return val * (1-val)
        
 
     def _relu_derv(self, x): 
@@ -84,20 +68,65 @@ class MLP():
     def _tanh_derv(self, x):
         return 1 - (((np.exp(x) - np.exp(-x))**2)/ ((np.exp(x)+ np.exp(-x))**2))
 
+    def loss_func(self, x,y): 
+        return (1/(len(x))) * sum(y-x)
+    
+    
+    def cross_entropy_loss(self,pred, y):
+        if y == 1:
+            return -np.log(pred)
+        else:
+            return -np.log(1 - pred)
+    
+    def forward_propagate(self,inputs):
+
+        activations = inputs
+        net_inputs = []
+        z_value = []
+        activated_value = []
+        activated_value.append(inputs)
+        for w,b,a in zip(self.weights,self.bias,self.activationfun):
+            net_inputs = (np.dot(activations, w)) + b
+            
+            activations = a(net_inputs)
+            z_value.append(net_inputs)
+            activated_value.append(activations)
+       
+        return z_value, activated_value
     
 
+    def back_propogate(self,z_value, activated_value,  y):
+#         eval = (1/(len(activated_value[-1]))) * sum(y-activated_value[-1])
+        eval = self.lss(activated_value[-1],y)
+
+        vfunc = np.vectorize(self._sigmoid_derv)
+#         sig_derv_activ = [vfunc(x) for x in z_value]
+        weight_update = []
+        bias_update = []
+        sig_derv_activ = []
+        for i in range(len(self.weights)-1, -1,-1):
+#                 sig_derv_activ[i] = sig_derv_activ[i] * eval
+                sig_derv_activ.insert(0,(self.activationfunderv[i](z_value[i]))*eval)
+                weight_update.insert(0,np.dot(np.reshape(sig_derv_activ[0], (-1, 1))
+                                              ,np.reshape(activated_value[i],(-1,1)).transpose()).transpose()*self.alpha)
+                bias_update.insert(0,sig_derv_activ[0] * self.alpha)
+                eval = np.dot(np.reshape(sig_derv_activ[0], (-1, 1)).transpose(),self.weights[i].transpose())
+
+        return weight_update, bias_update
+    
         
 
 if __name__ == "__main__":
 
-    # create a Multilayer Perceptron
-    mlp = MLP()
+    df = pd.read_csv('/Users/smiroshnikova/Desktop/trial.csv',header=None)
+    df_Y = df.iloc[:,-1]
+    df_X = df.iloc[:,0:-1]
+    sample_len = len(df)
+    mlp = MLP(numinputs=df_X.shape[0], hiddenlayers=[2], numoutputs=1,activationfunc = [1,1], alpha = 0.25, lossfunc =1 )
 
-    # set random values for network's input
-    inputs = np.random.rand(mlp.numinputs)
-
-    # perform forward propagation
-    output = mlp.forward_propagate(inputs)
-    print("Network activation input: {}".format(inputs))
-
-    print("Network activation: {}".format(output))
+    # for i in range(epochs):
+    for i in range(sample_len):
+        z_value, activated_value =mlp.forward_propagate(np.array(df_X.iloc[i]))
+        weight_update, bias_update= mlp.back_propogate(z_value,activated_value, df_Y.iloc[i])
+        mlp.weight_update()
+        mlp.bias_update()
