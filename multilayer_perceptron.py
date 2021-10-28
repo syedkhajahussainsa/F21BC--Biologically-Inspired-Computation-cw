@@ -11,13 +11,14 @@ class MLP():
         layers = [numinputs] + hiddenlayers + [numoutputs]
          
         # create random connection weights for the layers
-#         weights = []
-#         bias = []
-#         for i in range(len(layers)-1):
-#             bias.append(np.ones(layers[i+1]))
-#             weights.append(np.random.rand(layers[i], layers[i+1]))
-#         self.weights = weights
-#         self.bias = bias
+        weights = []
+        bias = []
+        for i in range(len(layers)-1):
+            bias.append(np.ones(layers[i+1]))
+            weights.append(np.random.rand(layers[i], layers[i+1]))
+        print(layers)
+        self.weights = weights
+        self.bias = bias
         self.alpha = alpha
         
         
@@ -29,11 +30,11 @@ class MLP():
         self.activationfun = [np.vectorize(self._sigmoid) if i == 1 else np.vectorize(self._relu) if i == 2   else np.vectorize(self._tanh)   for i in activationfunc]
         self.activationfunderv = [np.vectorize(self._sigmoid_derv) if i == 1 else np.vectorize(self._relu_derv) if i == 2   else np.vectorize(self._tanh_derv)  for i in activationfunc]
 
-        #Test
-        self.weights = [np.array([[-0.2, -0.1],
-        [ 0.1,  0.3]]), np.array([[0.2],
-        [0.3]])]
-        self.bias = [np.array([0.1, 0.1]), np.array([0.2])]
+#         #Test
+#         self.weights = [np.array([[-0.2, -0.1],
+#         [ 0.1,  0.3]]), np.array([[0.2],
+#         [0.3]])]
+#         self.bias = [np.array([0.1, 0.1]), np.array([0.2])]
         
         
         
@@ -114,6 +115,7 @@ class MLP():
 
         return weight_update, bias_update
     
+        
         
 
 if __name__ == "__main__":
