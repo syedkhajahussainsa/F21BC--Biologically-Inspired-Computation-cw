@@ -1,4 +1,6 @@
 import numpy as np
+import pandas as pd
+#from sklearn.model_selection import train_test_split
 #import sys
 class MLP():
 
@@ -124,7 +126,8 @@ if __name__ == "__main__":
     df_Y = df.iloc[:,-1]
     df_X = df.iloc[:,0:-1]
     sample_len = len(df)
-    """#inputs="[1,2,3] 0.25 [1,2,1] 1"
+    """X_train,X_test,Y_train,Y_test=train_test_split(df_X,df_Y,test_size=0.2)
+    #"[1,2,3] 0.25 [1,2,1] 1" input format
 b=sys.argv[1]
 c=b.split("[")
 d=c[1].split("]")
