@@ -1,5 +1,5 @@
 import numpy as np
-
+#import sys
 class MLP():
 
     def __init__(self, numinputs=4, hiddenlayers=[4,2,2,1], numoutputs=1, activationfunc = [1,1,1], alpha = 0.25, lossfunc = 1):
@@ -124,10 +124,9 @@ if __name__ == "__main__":
     df_Y = df.iloc[:,-1]
     df_X = df.iloc[:,0:-1]
     sample_len = len(df)
-    """inputs=input("enter the hiddenlayer learningrate activation lossfunction")
-#inputs="[1,2,3] 0.25 [1,2,1] 1"
-b=inputs.split()
-c=b[0].split("[")
+    """#inputs="[1,2,3] 0.25 [1,2,1] 1"
+b=sys.argv[1]
+c=b.split("[")
 d=c[1].split("]")
 e=d[0].split(",")
 hidden=[]
@@ -137,22 +136,22 @@ for i in range (len(e)):
 
     
 
-learningrate=float(b[1])
-
-f=b[2].split("[")
+learningrate=float(sys.argv[2])
+b1=sys.argv[3]
+f=b1.split("[")
 g=f[1].split("]")
 h=g[0].split(",")
 activation=[]
 for j in range (len(h)):
     activation.append(int(h[j]))
 
-lossfunction=int(b[3])
+lossfunction=int(sys.argv[4])
 
 print(hidden)
 print(learningrate)
 print(activation)
 print(lossfunction)
-    
+
 """
     mlp = MLP(numinputs=df_X.shape[1], hiddenlayers=[2], numoutputs=1,activationfunc = [1,1], alpha = 0.25, lossfunc =1 )
    
