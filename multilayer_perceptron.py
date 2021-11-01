@@ -121,9 +121,21 @@ class MLP():
         z_value, activated_value = mlp.forward_propagate(np.array(inputs))
         loss = self.lss(activated_value[-1],np.reshape(np.array(y),(-1,1)))
         cost = (1.0/len(y))*sum(loss)
+        print('#########')
+        print('Cost:'+str(cost))
         return activated_value[-1],loss, cost
 
 def training(df_X,hiddenlayers,numoutputs,activationfunc,alpha,loss,step, epochs):
+    print('Activation Functions are as follows: 1 -> Sigmoid | 2-> ReLu | 3-> tanH')
+    print('Loss Functions are as follows: 1 -> Error | 2-> Cross Entropy')
+    print('#########')
+    print('Results for hyperparameter:')
+    print('Epochs:' +str(epochs)) 
+    print('Steps:' + str(step))
+    print('Learning rate:' +str(alpha))
+    print('Number of hidden layers:'+str(len(hiddenlayers)) )
+    print('Loss function:'+str(lossfunc))
+    print('Activation functions:'+str(activationfunc))
     mlp = MLP(df_X.shape[1], hiddenlayers, numoutputs,activationfunc, alpha, lossfunc)
 
      # Need to add this as arg as well and epochs
@@ -191,19 +203,8 @@ if __name__ == "__main__":
     
     pred_val,loss, cost = mlp.predict_values(X_test,Y_test)
     
-    print('Activation Functions are as follows: 1 -> Sigmoid | 2-> ReLu | 3-> tanH')
-    print('Loss Functions are as follows: 1 -> Error | 2-> Cross Entropy')
-    print('#########')
-    print('Results for hyperparameter:')
-    print('Epochs:' +str(epochs)) 
-    print('Steps:' + str(step))
-    print('Learning rate:' +str(alpha))
-    print('Number of hidden layers:'+str(len(hiddenlayers)) )
-    print('Loss function:'+str(lossfunc))
-    print('Activation functions:'+str(activationfunc))
-    print('#########')
-
-    print('Cost:'+str(cost))
+    
+    
 
               
          
