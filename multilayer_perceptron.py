@@ -123,17 +123,28 @@ class MLP():
         cost = (1.0/len(y))*sum(loss)
         return activated_value[-1],loss, cost
 
+def training(df_X,hiddenlayers,numoutputs,activationfunc,alpha,loss,step, epochs):
+    mlp = MLP(df_X.shape[1], hiddenlayers, numoutputs,activationfunc, alpha, lossfunc)
 
+     # Need to add this as arg as well and epochs
+    for i in range(epochs):
+        for i in range(0, sample_len,step): #sample_len,5): 
+            z_value, activated_value =mlp.forward_propagate(np.array(X_train.iloc[i:i+step]))            
+            weight_update, bias_update= mlp.back_propogate(z_value,activated_value, np.array(Y_train.iloc[i:i+step]).reshape(step,1),step)
+            mlp.weight_update(weight_update)
+            mlp.bias_update(bias_update)
+    return mlp
+           
+    
 if __name__ == "__main__":
 
-    df = pd.read_csv('/Users/smiroshnikova/Desktop/trial.csv',header=None)
-#     df = pd.read_csv('/Users/smiroshnikova/Desktop/data_banknote_authentication.csv',header=None)
+#     df = pd.read_csv('/Users/smiroshnikova/Desktop/trial.csv',header=None)
+    df = pd.read_csv('/Users/smiroshnikova/Desktop/data_banknote_authentication.csv',header=None)
 
     df_Y = df.iloc[:,-1]
     df_X = df.iloc[:,0:-1]
     X_train,X_test,Y_train,Y_test=train_test_split(df_X,df_Y,test_size=0.5)
     sample_len = len(X_train)
-    print(sample_len)
     epochs = 1
     #"[1,2,3] 0.25 [1,2,1] 1" input format
     """b=sys.argv[1]
@@ -159,22 +170,41 @@ if __name__ == "__main__":
     print(activation)
     print(lossfunction)
     """
-    mlp = MLP(numinputs=df_X.shape[1], hiddenlayers=[2], numoutputs=1,activationfunc = [1,1], alpha = 0.25, lossfunc =1)
+    hiddenlayers=[2]
+    numoutputs=1
+    activationfunc = [1,1]
+    alpha = 0.25
+    lossfunc =1
+    step = 2 # Need to add this as arg as well and epochs
+    epochs = 1000
+#     mlp = MLP(numinputs=df_X.shape[1], hiddenlayers=[2], numoutputs=1,activationfunc = [1,1], alpha = 0.25, lossfunc =1)
     
 
-    step = 2 # Need to add this as arg as well and epochs
-    for i in range(epochs):
-        print('Current epoch: '+ str(epoch))
-        for i in range(0, sample_len,step): #sample_len,5): 
-            z_value, activated_value =mlp.forward_propagate(np.array(X_train.iloc[i:i+step]))            
-            weight_update, bias_update= mlp.back_propogate(z_value,activated_value, np.array(Y_train.iloc[i:i+step]).reshape(step,1),step)
-            mlp.weight_update(weight_update)
-            mlp.bias_update(bias_update)
-            
+#     for i in range(epochs):
+#         print('Current epoch: '+ str(epoch))
+#         for i in range(0, sample_len,step): #sample_len,5): 
+#             z_value, activated_value =mlp.forward_propagate(np.array(X_train.iloc[i:i+step]))            
+#             weight_update, bias_update= mlp.back_propogate(z_value,activated_value, np.array(Y_train.iloc[i:i+step]).reshape(step,1),step)
+#             mlp.weight_update(weight_update)
+#             mlp.bias_update(bias_update)
+    mlp = training(df_X, hiddenlayers, numoutputs,activationfunc , alpha, lossfunc, step, epochs)
+    
     pred_val,loss, cost = mlp.predict_values(X_test,Y_test)
-    print(pred_val)
-    print(loss)
-    print(cost)
+    
+    print('Activation Functions are as follows: 1 -> Sigmoid | 2-> ReLu | 3-> tanH')
+    print('Loss Functions are as follows: 1 -> Error | 2-> Cross Entropy')
+    print('#########')
+    print('Results for hyperparameter:')
+    print('Epochs:' +str(epochs)) 
+    print('Steps:' + str(step))
+    print('Learning rate:' +str(alpha))
+    print('Number of hidden layers:'+str(len(hiddenlayers)) )
+    print('Loss function:'+str(lossfunc))
+    print('Activation functions:'+str(activationfunc))
+    print('#########')
+
+    print('Cost:'+str(cost))
+
               
          
     #Test Cases
