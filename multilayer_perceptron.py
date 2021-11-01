@@ -72,7 +72,7 @@ class MLP():
         return 1 - (((np.exp(x) - np.exp(-x))**2)/ ((np.exp(x)+ np.exp(-x))**2))
 
     def loss_func(self, x,y): 
-       
+        #add aquare root
         return y-x
     
     
@@ -189,30 +189,14 @@ if __name__ == "__main__":
     lossfunc =1
     step = 2 # Need to add this as arg as well and epochs
     epochs = 1000
-#     mlp = MLP(numinputs=df_X.shape[1], hiddenlayers=[2], numoutputs=1,activationfunc = [1,1], alpha = 0.25, lossfunc =1)
-    
-
-#     for i in range(epochs):
-#         print('Current epoch: '+ str(epoch))
-#         for i in range(0, sample_len,step): #sample_len,5): 
-#             z_value, activated_value =mlp.forward_propagate(np.array(X_train.iloc[i:i+step]))            
-#             weight_update, bias_update= mlp.back_propogate(z_value,activated_value, np.array(Y_train.iloc[i:i+step]).reshape(step,1),step)
-#             mlp.weight_update(weight_update)
-#             mlp.bias_update(bias_update)
-    mlp = training(df_X, hiddenlayers, numoutputs,activationfunc , alpha, lossfunc, step, epochs)
-    
+    mlp = training(X_train, hiddenlayers, numoutputs,activationfunc , alpha, lossfunc, step, epochs)
     pred_val,loss, cost = mlp.predict_values(X_test,Y_test)
     
+    epoch_test = []
+    for i in range(0, 10000, 5000): 
+        mlp = training(X_train, hiddenlayers, numoutputs,activationfunc , alpha, lossfunc, step, i)
+        pred_val,loss, cost = mlp.predict_values(X_test,Y_test)
+        epoch_test.append((i,cost))
     
     
-
-              
-         
-    #Test Cases
-    #Epochs
-    #Steps
-    #Learning Rate (alpha)
-    #Hidden Layers
-    #Loss function
-    #Activation Function
     
