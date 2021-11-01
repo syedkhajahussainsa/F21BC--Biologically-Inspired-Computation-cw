@@ -117,16 +117,21 @@ class MLP():
         
         
         
-        
+    def predict_values(self, inputs, y): 
+        z_value, activated_value = mlp.forward_propagate(np.array(inputs))
+        loss = self.lss(activated_value[-1],np.reshape(np.array(y),(-1,1)))
+        cost = (1.0/len(y))*sum(loss)
+        return activated_value[-1],loss, cost
+
 
 if __name__ == "__main__":
 
-#     df = pd.read_csv('/Users/smiroshnikova/Desktop/trial.csv',header=None)
-    df = pd.read_csv('/Users/smiroshnikova/Desktop/data_banknote_authentication.csv',header=None)
+    df = pd.read_csv('/Users/smiroshnikova/Desktop/trial.csv',header=None)
+#     df = pd.read_csv('/Users/smiroshnikova/Desktop/data_banknote_authentication.csv',header=None)
 
     df_Y = df.iloc[:,-1]
     df_X = df.iloc[:,0:-1]
-    X_train,X_test,Y_train,Y_test=train_test_split(df_X,df_Y,test_size=0.98)
+    X_train,X_test,Y_train,Y_test=train_test_split(df_X,df_Y,test_size=0.5)
     sample_len = len(X_train)
     print(sample_len)
     epochs = 1
@@ -157,7 +162,7 @@ if __name__ == "__main__":
     mlp = MLP(numinputs=df_X.shape[1], hiddenlayers=[2], numoutputs=1,activationfunc = [1,1], alpha = 0.25, lossfunc =1)
     
 
-    step = 3 # Need to add this as arg as well
+    step = 2 # Need to add this as arg as well and epochs
     for i in range(epochs):
         print('Current epoch: '+ str(epoch))
         for i in range(0, sample_len,step): #sample_len,5): 
@@ -165,4 +170,18 @@ if __name__ == "__main__":
             weight_update, bias_update= mlp.back_propogate(z_value,activated_value, np.array(Y_train.iloc[i:i+step]).reshape(step,1),step)
             mlp.weight_update(weight_update)
             mlp.bias_update(bias_update)
-                        
+            
+    pred_val,loss, cost = mlp.predict_values(X_test,Y_test)
+    print(pred_val)
+    print(loss)
+    print(cost)
+              
+         
+    #Test Cases
+    #Epochs
+    #Steps
+    #Learning Rate (alpha)
+    #Hidden Layers
+    #Loss function
+    #Activation Function
+    
