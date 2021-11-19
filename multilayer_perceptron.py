@@ -4,11 +4,25 @@ import pandas as pd
 #import sys
 class MLP():
 
-    def __init__(self, numinputs=4, hiddenlayers=[4,2,2,1], numoutputs=1, activationfunc = [1,1,1], alpha = 0.25, lossfunc = 1):
+    def __init__(self, numinputs=4, hiddenlayers=[4,2,2,1], numoutputs=1, activationfunc = [1,1,1], alpha = 0.25, lossfunc = 1,cost_func, x_low, x_high, size=50):
         self.numinputs = numinputs
         self.hiddenlayers = hiddenlayers
         self.numoutputs = numoutputs
-
+#new variables for ParticleSwarm
+        self.cost_func = cost_func
+        self.x_low = np.array(x_low)
+        self.x_high = np.array(x_high)
+        self.v_high = (self.x_high - self.x_low) / 2.
+        self.v_low = -self.v_high
+        self.dim = len(x_low)
+        self.size = size
+        self.X = np.random.uniform(self.x_low, self.x_high, (self.size, self.dim))
+        self.V = np.random.uniform(self.v_low, self.v_high, (self.size, self.dim))
+        self.P = self.X.copy()
+        self.S = self.cost_func(self.X)
+        self.g = self.P[self.S.argmin()]
+        self.best_score = self.S.min()
+# end of ParticleSwarm variables
         # create a generic representation of the layers
         layers = [numinputs] + hiddenlayers + [numoutputs]
          
@@ -146,8 +160,80 @@ def training(df_X,hiddenlayers,numoutputs,activationfunc,alpha,loss,step, epochs
             mlp.weight_update(weight_update)
             mlp.bias_update(bias_update)
     return mlp
-           
-    
+
+
+ #ParticleSwarm code           
+    def optimize(self, epsilon=1e-3, max_iter=100):
+        iteration = 0
+        while self.best_score > epsilon and iteration < max_iter:
+            self.update()
+            iteration = iteration + 1
+        return self.g
+
+    def update(self, omega=1.0, phi_p=2.0, phi_g=2.0):
+        # Velocities update
+        R_p = np.random.uniform(size=(self.size, self.dim))
+        R_g = np.random.uniform(size=(self.size, self.dim))
+
+        self.V = omega * self.V \
+                + phi_p * R_p * (self.P - self.X) \
+                + phi_g * R_g * (self.g - self.X)
+
+        # Velocities bounding
+        self.V = np.where(self.V < self.v_low, self.v_low, self.V)
+        self.V = np.where(self.V > self.v_high, self.v_high, self.V)
+
+        # Positions update
+        self.X = self.X + self.V
+
+        # Positions bounding
+        self.X = np.where(self.X < self.x_low, self.x_low, self.X)
+        self.X = np.where(self.X > self.x_high, self.x_high, self.X)
+
+        # Best scores
+        scores = self.cost_func(self.X)
+
+        better_scores_idx = scores < self.S
+        self.P[better_scores_idx] = self.X[better_scores_idx]
+        self.S[better_scores_idx] = scores[better_scores_idx]
+
+        self.g = self.P[self.S.argmin()]
+        self.best_score = self.S.min()
+
+
+    def evaluate_simple(x):
+ #   """Simple 2D concave surface with the minimum at the origin"""
+       x = np.reshape(x, (-1, 2))
+       return np.sum(x**2, axis=1)
+
+    def schaffer6(x):
+#    """Complex 2D surface with the global minimum at the origin"""
+      x = np.reshape(x, (-1, 2))
+      sumOfSquares = np.sum(x**2, axis=1)
+      return 0.5 + (np.sin(np.sqrt(sumOfSquares))**2 - 0.5) / (1 + 0.001 * sumOfSquares)**2
+
+    def test_simple_optimization():
+        swarm = pso.ParticleSwarm(
+            cost_func=evaluate_simple,
+            x_low=[-100., -100.],
+            x_high=[100., 100.],
+            size=20
+    )
+
+    best = swarm.optimize(epsilon=1e-6, max_iter=100000)
+    assert evaluate_simple(best) < 1e-6
+
+    def test_complex_optimization():
+        swarm = pso.ParticleSwarm(
+            cost_func=schaffer6,
+            x_low=[-100., -100.],
+            x_high=[100., 100.],
+            size=20
+        )
+
+        best = swarm.optimize(epsilon=1e-6, max_iter=100000)
+        assert schaffer6(best) < 1e-6
+
 if __name__ == "__main__":
 
 #     df = pd.read_csv('/Users/smiroshnikova/Desktop/trial.csv',header=None)
